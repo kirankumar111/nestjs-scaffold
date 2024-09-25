@@ -10,7 +10,8 @@ import { ServerConfig, ServerConfigName } from './configs/server.config';
 import { AllExceptionsFilter } from './common/filters/all-exceptions.filter';
 import { ResponseInterceptor } from './common/interceptors/response.interceptor';
 import compress from '@fastify/compress';  // Use the correct package
-import { Logger } from 'nestjs-pino';
+import { Logger, LoggerErrorInterceptor } from 'nestjs-pino';
+import { setupSwagger } from './swagger/swagger.config';
 
 
 async function bootstrap() {
@@ -30,19 +31,20 @@ async function bootstrap() {
       secure: isProduction,
     }});
   app.enableCors();
-  const config = new DocumentBuilder()
-    .setTitle(process.env.APP_NAME || 'NestJs Scaffold')
-    .setDescription(process.env.APP_DESCRIPTION || 'This is the NestJs Scaffold Repository')
-    .setVersion(process.env.APP_VERSION || '1.0')
-    .build();
-  const document = SwaggerModule.createDocument(app, config);
-  SwaggerModule.setup('api', app, document);
+  if(!isProduction) {
+    setupSwagger(app);
+  }
   app.useGlobalPipes(new ValidationPipe({ whitelist: true }));
   app.useGlobalFilters(new AllExceptionsFilter());  
+  
   const configService = app.get(ConfigService);
   const serverConfig = configService.getOrThrow<ServerConfig>(ServerConfigName);
-  app.useGlobalInterceptors(new NewrelicInterceptor());
-  app.useGlobalInterceptors(new ResponseInterceptor);
+
+  app.useGlobalInterceptors(
+    new LoggerErrorInterceptor(),
+    new NewrelicInterceptor(),
+    new ResponseInterceptor(),
+  );
 
   try {
     await app.listen(serverConfig.port,serverConfig.host||'0.0.0.0');

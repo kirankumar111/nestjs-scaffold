@@ -28,7 +28,7 @@ import { LoggerModule } from 'nestjs-pino';
           options: {
             singleLine: true,
             colorize: true,         // Adds color to console logs
-            ignore: 'reqId',
+            ignore: 'reqId,context',
           }
         },
         quietReqLogger: true,  // Disable automatic request logging
