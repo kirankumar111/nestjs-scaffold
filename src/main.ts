@@ -17,7 +17,7 @@ async function bootstrap() {
   const app = await NestFactory.create<NestFastifyApplication>(
     AppModule,
     new FastifyAdapter({ caseSensitive: false, ignoreTrailingSlash: true }),
-    { bufferLogs: true }
+    { bufferLogs: true , snapshot: true}
   );
 
   // Set up logging

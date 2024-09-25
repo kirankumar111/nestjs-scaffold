@@ -8,6 +8,7 @@ import { ApplicationModule } from './modules/application/application.module';
 import { KafkaModule } from './providers/infra/kafka/kafka.module';
 import { EventConsumerModule } from './events/consumers/consumer.module';
 import { LoggerModule } from 'nestjs-pino';
+import { DevtoolsModule } from '@nestjs/devtools-integration';
 
 @Module({
   imports: [
@@ -34,6 +35,10 @@ import { LoggerModule } from 'nestjs-pino';
         quietReqLogger: true,  // Disable automatic request logging
         autoLogging: false, // Disable auto logging of requests
       },
+    }),
+    DevtoolsModule.register({
+      http: process.env.NODE_ENV !== 'production',
+      port: 9229,
     }),
   ],
   controllers: [],
